@@ -1,10 +1,9 @@
-
 '''
 MAP Client Plugin Step
 '''
 import json
 
-from PySide import QtGui
+from PySide2 import QtGui
 
 from mapclient.mountpoints.workflowstep import WorkflowStepMountPoint
 from mapclientplugins.coordinateframeselectorstep.configuredialog import ConfigureDialog
@@ -20,10 +19,10 @@ class CoordinateFrameSelectorStep(WorkflowStepMountPoint):
 
     def __init__(self, location):
         super(CoordinateFrameSelectorStep, self).__init__('Coordinate Frame Selector', location)
-        self._configured = False # A step cannot be executed until it has been configured.
+        self._configured = False  # A step cannot be executed until it has been configured.
         self._category = 'Utility'
         # Add any other initialisation code here:
-        self._icon =  QtGui.QImage(':/coordinateframeselectorstep/images/utility.png')
+        self._icon = QtGui.QImage(':/coordinateframeselectorstep/images/utility.png')
         # Ports:
         self.addPort(('http://physiomeproject.org/workflow/1.0/rdf-schema#port',
                       'http://physiomeproject.org/workflow/1.0/rdf-schema#provides',
@@ -35,13 +34,12 @@ class CoordinateFrameSelectorStep(WorkflowStepMountPoint):
                       'http://physiomeproject.org/workflow/1.0/rdf-schema#uses',
                       'http://physiomeproject.org/workflow/1.0/rdf-schema#file_location'))
         # Port data:
-        self._portData0 = None # http://physiomeproject.org/workflow/1.0/rdf-schema#coordinate_description
-        self._portData1 = None # http://physiomeproject.org/workflow/1.0/rdf-schema#file_location
-        self._portData2 = None # http://physiomeproject.org/workflow/1.0/rdf-schema#file_location
+        self._portData0 = None  # http://physiomeproject.org/workflow/1.0/rdf-schema#coordinate_description
+        self._portData1 = None  # http://physiomeproject.org/workflow/1.0/rdf-schema#file_location
+        self._portData2 = None  # http://physiomeproject.org/workflow/1.0/rdf-schema#file_location
         # Config:
         self._config = {}
         self._config['identifier'] = ''
-
 
     def execute(self):
         '''
@@ -52,9 +50,9 @@ class CoordinateFrameSelectorStep(WorkflowStepMountPoint):
         # Put your execute step code here before calling the '_doneExecution' method.
         csv_file = self._portData1
         data_file = self._portData2
-        
+
         key, _ = os.path.splitext(os.path.basename(data_file))
-        
+
         key = key.lower()
         database = {}
         with open(csv_file) as f:
@@ -69,14 +67,14 @@ class CoordinateFrameSelectorStep(WorkflowStepMountPoint):
                     axis = self._convertToFloatList(line_components[2])
                     centroid = self._convertToFloatList(line_components[3])
                     database[line_components[0].lower()] = [origin, axis, centroid]
-                
+
         if key in database:
             self._portData0 = database[key]
         else:
             self._portData0 = []
-        
+
         self._doneExecution()
-        
+
     def _convertToFloatList(self, text):
         split_text = text.split(' ')
         return [float(s) for s in split_text if s]
@@ -88,9 +86,9 @@ class CoordinateFrameSelectorStep(WorkflowStepMountPoint):
         uses port for this step then the index can be ignored.
         '''
         if index == 1:
-            self._portData1 = dataIn # http://physiomeproject.org/workflow/1.0/rdf-schema#file_location
+            self._portData1 = dataIn  # http://physiomeproject.org/workflow/1.0/rdf-schema#file_location
         else:
-            self._portData2 = dataIn # http://physiomeproject.org/workflow/1.0/rdf-schema#file_location
+            self._portData2 = dataIn  # http://physiomeproject.org/workflow/1.0/rdf-schema#file_location
 
     def getPortData(self, index):
         '''
@@ -98,7 +96,7 @@ class CoordinateFrameSelectorStep(WorkflowStepMountPoint):
         The index is the index of the port in the port list.  If there is only one
         provides port for this step then the index can be ignored.
         '''
-        return self._portData0 # http://physiomeproject.org/workflow/1.0/rdf-schema#coordinate_description
+        return self._portData0  # http://physiomeproject.org/workflow/1.0/rdf-schema#coordinate_description
 
     def configure(self):
         '''
@@ -108,7 +106,7 @@ class CoordinateFrameSelectorStep(WorkflowStepMountPoint):
         then set:
             self._configured = True
         '''
-        dlg = ConfigureDialog()
+        dlg = ConfigureDialog(self._main_window)
         dlg.identifierOccursCount = self._identifierOccursCount
         dlg.setConfig(self._config)
         dlg.validate()
@@ -139,7 +137,6 @@ class CoordinateFrameSelectorStep(WorkflowStepMountPoint):
         '''
         return json.dumps(self._config, default=lambda o: o.__dict__, sort_keys=True, indent=4)
 
-
     def deserialize(self, string):
         '''
         Add code to deserialize this step from string.  This method should
@@ -151,5 +148,3 @@ class CoordinateFrameSelectorStep(WorkflowStepMountPoint):
         d.identifierOccursCount = self._identifierOccursCount
         d.setConfig(self._config)
         self._configured = d.validate()
-
-
